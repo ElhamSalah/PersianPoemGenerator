@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persian Poem Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        #poem {
+            margin-top: 20px;
+            font-size: 1.5em;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Persian Poem Generator</h1>
+    <form id="poem-generator-form">
+        <label for="user-instructions">Enter a theme for the poem:</label><br>
+        <input type="text" id="user-instructions" required><br>
+        <button type="submit">Generate Poem</button>
+    </form>
+
+    <div id="poem" class="hidden"></div>
+
+    <script>
+        function displayPoem(response) {
+            const poemElement = document.querySelector("#poem");
+            const poemText = response.data.choices[0].text.trim();
+            poemElement.innerHTML = poemText + '<strong> SheCodes AI</strong>';
+            poemElement.classList.remove("hidden");
+        }
+
+        function generatePoem(event) {
+            event.preventDefault();
+
+            const instructionsInput = document.querySelector("#user-instructions").value;
+            const apiKey = "YOUR_OPENAI_API_KEY"; // Replace with your OpenAI API key
+            const prompt = `Generate a Persian poem about ${instructionsInput}`;
+
+            const requestBody = {
+                prompt: prompt,
+                max_tokens: 60,
+                temperature: 0.7,
+                model: "text-davinci-003" // Specify the model
+            };
+
+            const apiURL = `https://api.openai.com/v1/completions`;
+
+            const poemElement = document.querySelector("#poem");
+            poemElement.innerHTML = `<div class="generating">⏳ Generating a Persian poem about "${instructionsInput}"...</div>`;
+            poemElement.classList.remove("hidden");
+
+            axios.post(apiURL, requestBody, {
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            }).then(displayPoem)
+              .catch(error => {
+                  poemElement.innerHTML = "Error generating poem. Please try again.";
+                  console.error("Error:", error);
+              });
+        }
+
+        const poemFormElement = document.querySelector("#poem-generator-form");
+        poemFormElement.addEventListener("submit", generatePoem);
+    </script>
+</body>
+</html>
